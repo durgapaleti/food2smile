@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Share Surplus Food - Food2Smile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <i class="bi bi-heart-pulse-fill me-2 text-warning"></i>Food2<span>Smile</span>
+      </a>
+      <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="find-food.html">Find Food</a></li>
+          <li class="nav-item"><a class="nav-link active" href="share-food.html">Share Food</a></li>
+          <li class="nav-item"><a class="nav-link" href="going-away.html">Going Away</a></li>
+          <li class="nav-item"><a class="nav-link" href="my-foods.html">My Foods</a></li>
+          <li class="nav-item"><a class="nav-link" href="requests.html">Requests</a></li>
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        </ul>
+        <div id="navbarAuthSection" class="d-flex align-items-center"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="form-card">
+          <h2 class="fw-bold text-dark mb-1">Share Your Surplus Food</h2>
+          <p class="text-muted mb-4">List extra groceries, bakery items, or cooked meals to prevent food waste.</p>
+
+          <form id="shareFoodForm">
+            <!-- Food Name -->
+            <div class="mb-3">
+              <label for="foodName" class="form-label">Food Name <span class="text-danger">*</span></label>
+              <input type="text" id="foodName" class="form-control" placeholder="e.g. Fresh Tomatoes, Homemade Paneer Masala, Bread Pack" required>
+            </div>
+
+            <!-- Category & Quantity Row -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="foodCategory" class="form-label">Category <span class="text-danger">*</span></label>
+                <select id="foodCategory" class="form-select" required>
+                  <option value="" selected disabled>Select Category</option>
+                  <option value="Vegetables">Vegetables</option>
+                  <option value="Fruits">Fruits</option>
+                  <option value="Dairy">Dairy</option>
+                  <option value="Bakery">Bakery</option>
+                  <option value="Cooked Food">Cooked Food</option>
+                  <option value="Groceries">Groceries</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="foodQuantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+                <input type="text" id="foodQuantity" class="form-control" placeholder="e.g. 2 kg, 1 dozen, 2 tiffins" required>
+              </div>
+            </div>
+
+            <!-- Pickup Location / Area -->
+            <div class="mb-3">
+              <label for="foodLocation" class="form-label">Pickup Location / Area</label>
+              <input type="text" id="foodLocation" class="form-control" placeholder="e.g. Hostel Block B, Sector 14, Mess Gate 2">
+            </div>
+
+            <!-- Spoiling Date & Alert -->
+            <div class="mb-4">
+              <label for="spoilingDate" class="form-label">Spoiling Date <span class="text-danger">*</span></label>
+              <input type="date" id="spoilingDate" class="form-control" required>
+              <div id="spoilingWarningAlert" class="alert mt-2 d-none" role="alert"></div>
+            </div>
+
+            <!-- Action Options -->
+            <div class="mb-4">
+              <label class="form-label d-block fw-bold text-dark">Offer Type <span class="text-danger">*</span></label>
+              <div class="row g-3">
+                <div class="col-6 col-md-3">
+                  <input type="radio" class="btn-check" name="foodAction" id="actionSell" value="Sell" checked>
+                  <label class="btn btn-outline-dark w-100 py-3 rounded-3 text-center h-100" for="actionSell">
+                    <div class="fs-4"><i class="bi bi-currency-rupee text-primary"></i></div>
+                    <div class="fw-bold">Sell</div>
+                  </label>
+                </div>
+
+                <div class="col-6 col-md-3">
+                  <input type="radio" class="btn-check" name="foodAction" id="actionDiscount" value="Discount">
+                  <label class="btn btn-outline-dark w-100 py-3 rounded-3 text-center h-100" for="actionDiscount">
+                    <div class="fs-4"><i class="bi bi-percent text-warning"></i></div>
+                    <div class="fw-bold">Discount</div>
+                  </label>
+                </div>
+
+                <div class="col-6 col-md-3">
+                  <input type="radio" class="btn-check" name="foodAction" id="actionFree" value="Free">
+                  <label class="btn btn-outline-dark w-100 py-3 rounded-3 text-center h-100" for="actionFree">
+                    <div class="fs-4"><i class="bi bi-gift text-success"></i></div>
+                    <div class="fw-bold">Give Free</div>
+                  </label>
+                </div>
+
+                <div class="col-6 col-md-3">
+                  <input type="radio" class="btn-check" name="foodAction" id="actionDonate" value="Donate">
+                  <label class="btn btn-outline-dark w-100 py-3 rounded-3 text-center h-100" for="actionDonate">
+                    <div class="fs-4"><i class="bi bi-heart-fill text-danger"></i></div>
+                    <div class="fw-bold">Donate</div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sell Section -->
+            <div id="sellSection" class="mb-4">
+              <label for="originalPrice" class="form-label">Asking Price (₹)</label>
+              <input type="number" id="originalPrice" class="form-control" placeholder="100" min="0">
+            </div>
+
+            <!-- Discount Section -->
+            <div id="discountSection" class="p-3 bg-light rounded-3 mb-4 d-none">
+              <label for="discountSelect" class="form-label fw-bold">Select Discount Rate</label>
+              <select id="discountSelect" class="form-select mb-2">
+                <option value="30">30% OFF</option>
+                <option value="40">40% OFF</option>
+                <option value="50">50% OFF</option>
+              </select>
+            </div>
+
+            <!-- Free Section -->
+            <div id="freeSection" class="p-3 bg-light rounded-3 mb-4 d-none">
+              <h6 class="fw-bold text-success mb-1"><i class="bi bi-gift me-1"></i> Free Surplus Food</h6>
+              <p class="small text-muted mb-3">The food is offered for free. The receiver only pays delivery charges if delivery is requested.</p>
+
+              <label class="form-label fw-bold">Pickup & Delivery Terms</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="deliveryOption" id="delSelf" value="Self Pickup" checked>
+                  <label class="form-check-label fw-semibold" for="delSelf">
+                    🚶 Self Pickup - ₹0
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="deliveryOption" id="delDelivery" value="Delivery (Receiver Pays)">
+                  <label class="form-check-label fw-semibold" for="delDelivery">
+                    🚚 Delivery - Receiver Pays
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Donate Section -->
+            <div id="donateSection" class="p-3 rounded-3 mb-4 d-none border border-danger border-opacity-25" style="background-color: #FFF0F5;">
+              <h6 class="fw-bold text-danger mb-1"><i class="bi bi-heart-fill me-1"></i> Food Donation</h6>
+              <p class="small text-muted mb-0">Your food will be listed as a donation for someone in need.</p>
+            </div>
+
+            <!-- Calculated Price Preview -->
+            <div class="p-3 border rounded-3 mb-4 bg-white d-flex justify-content-between align-items-center">
+              <span class="fw-bold text-dark">Final Price:</span>
+              <span id="calculatedPriceDisplay" class="fs-4 fw-bold text-success">₹0</span>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-green w-100 py-3 fs-5 rounded-2">
+              List Food Now
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container text-center">
+      <h5 class="fw-bold text-white mb-1"><i class="bi bi-heart-pulse-fill me-1 text-warning"></i> Food2Smile</h5>
+      <p class="small text-white-50 mb-0">Turn Surplus into Smiles. ❤️</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/foods.js"></script>
+  <script src="js/requests.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>

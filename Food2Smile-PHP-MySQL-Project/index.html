@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food2Smile - Turn Surplus into Smiles. ❤️</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <i class="bi bi-heart-pulse-fill me-2 text-warning"></i>Food2<span>Smile</span>
+      </a>
+      <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+          <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="find-food.html">Find Food</a></li>
+          <li class="nav-item"><a class="nav-link" href="share-food.html">Share Food</a></li>
+          <li class="nav-item"><a class="nav-link" href="going-away.html">Going Away</a></li>
+          <li class="nav-item"><a class="nav-link" href="my-foods.html">My Foods</a></li>
+          <li class="nav-item"><a class="nav-link" href="requests.html">Requests</a></li>
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        </ul>
+        <div id="navbarAuthSection" class="d-flex align-items-center"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-4">
+    <!-- Hero Banner -->
+    <div class="hero-wrapper mb-5">
+      <div class="row align-items-center">
+        <div class="col-lg-7">
+          <div class="hero-sub-tag"><i class="bi bi-heart-fill text-danger me-1"></i> Community Surplus Food Sharing Platform</div>
+          <h1 class="hero-heading mb-3">Turn <span>Surplus</span> into <span>Smiles</span>. ❤️</h1>
+          <p class="hero-lead mb-4">
+            Don't let good food go to waste. Sell, discount, give away for free, or donate surplus meals, fruits, bakery items, and groceries to nearby neighbours and community members.
+          </p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="share-food.html" class="btn btn-green btn-lg shadow-sm">
+              <i class="bi bi-plus-circle me-1"></i> Share Surplus Food
+            </a>
+            <a href="find-food.html" class="btn btn-outline-green btn-lg">
+              <i class="bi bi-search me-1"></i> Discover Food Near Me
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Action Cards -->
+    <div class="row g-4 mb-5">
+      <div class="col-md-6 col-lg-3">
+        <a href="share-food.html" class="card-feature">
+          <div class="feature-icon-wrapper">
+            <i class="bi bi-currency-rupee"></i>
+          </div>
+          <h5 class="fw-bold text-dark mb-2">Sell Surplus</h5>
+          <p class="small text-muted mb-0">List extra food items at a fair asking price before they spoil.</p>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <a href="share-food.html" class="card-feature">
+          <div class="feature-icon-wrapper feature-icon-amber">
+            <i class="bi bi-percent"></i>
+          </div>
+          <h5 class="fw-bold text-dark mb-2">Offer Discount</h5>
+          <p class="small text-muted mb-0">Give 30%, 40%, or 50% discounts to quickly clear excess inventory.</p>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <a href="share-food.html" class="card-feature">
+          <div class="feature-icon-wrapper">
+            <i class="bi bi-gift"></i>
+          </div>
+          <h5 class="fw-bold text-dark mb-2">Give Free</h5>
+          <p class="small text-muted mb-0">Share wholesome unconsumed food completely free with neighbours.</p>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <a href="share-food.html" class="card-feature">
+          <div class="feature-icon-wrapper feature-icon-orange">
+            <i class="bi bi-heart-fill"></i>
+          </div>
+          <h5 class="fw-bold text-dark mb-2">Donate Food</h5>
+          <p class="small text-muted mb-0">Support families in need by donating fresh meals and groceries.</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Going Away Banner -->
+    <div class="going-away-banner mb-5">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <h4 class="fw-bold text-dark mb-2"><i class="bi bi-airplane me-2 text-warning"></i> Going Away on a Trip or Weekend?</h4>
+          <p class="text-muted mb-0">Don't leave perishables in your fridge to spoil. Quickly list your vegetables, milk, bread, or fruits before travelling!</p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+          <a href="going-away.html" class="btn btn-terracotta btn-lg">
+            <i class="bi bi-box-seam me-1"></i> Quick Going Away Form
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured Food Listings Preview -->
+    <div class="mb-5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h3 class="fw-bold text-dark mb-1">Available Food Near You</h3>
+          <p class="text-muted small mb-0">Fresh listings added by community members recently.</p>
+        </div>
+        <a href="find-food.html" class="btn btn-outline-green">View All Marketplace →</a>
+      </div>
+
+      <div class="row" id="homeFeaturedFoods">
+        <!-- Dynamically populated by JS -->
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container text-center">
+      <h5 class="fw-bold text-white mb-1"><i class="bi bi-heart-pulse-fill me-1 text-warning"></i> Food2Smile</h5>
+      <p class="small text-white-50 mb-0">Turn Surplus into Smiles. ❤️</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/foods.js"></script>
+  <script src="js/requests.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>

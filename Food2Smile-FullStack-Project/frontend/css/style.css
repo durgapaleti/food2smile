@@ -1,0 +1,570 @@
+/* 
+  Food2Smile - Web Technologies College Project
+  Custom Stylesheet (Human-designed & handcrafted)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;700;800&display=swap');
+
+:root {
+  --bg-main: #FAF7F2;
+  --nav-bg: #1B4332;
+  --primary-green: #2D6A4F;
+  --accent-green: #52B788;
+  --light-green: #D8F3DC;
+  --accent-orange: #E06D53;
+  --warm-amber: #F4A261;
+  --card-bg: #FFFFFF;
+  --text-primary: #1C2D27;
+  --text-muted: #5C6F68;
+  --border-color: #E2E8E4;
+  
+  --radius-card: 16px;
+  --radius-btn: 10px;
+  --radius-pill: 50px;
+  
+  --shadow-subtle: 0 4px 16px rgba(27, 67, 50, 0.05);
+  --shadow-card: 0 8px 24px rgba(27, 67, 50, 0.07);
+  --shadow-hover: 0 12px 32px rgba(27, 67, 50, 0.12);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, .brand-font {
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Header & Navbar */
+.navbar-custom {
+  background-color: var(--nav-bg);
+  padding: 0.8rem 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: #FFFFFF !important;
+}
+
+.navbar-brand span {
+  color: var(--accent-green);
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-weight: 600;
+  font-size: 0.93rem;
+  padding: 0.5rem 0.85rem !important;
+  border-radius: var(--radius-btn);
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* User Avatar Pill */
+.user-avatar-pill {
+  width: 32px;
+  height: 32px;
+  background: var(--accent-green);
+  color: var(--nav-bg);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* Custom Buttons */
+.btn-green {
+  background-color: var(--primary-green);
+  color: #FFFFFF;
+  border: none;
+  font-weight: 600;
+  border-radius: var(--radius-btn);
+  padding: 0.6rem 1.3rem;
+  transition: all 0.2s ease;
+}
+
+.btn-green:hover {
+  background-color: #1B4332;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25);
+}
+
+.btn-outline-green {
+  border: 1.5px solid var(--primary-green);
+  color: var(--primary-green);
+  background: transparent;
+  font-weight: 600;
+  border-radius: var(--radius-btn);
+  padding: 0.55rem 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-green:hover {
+  background-color: var(--light-green);
+  color: var(--nav-bg);
+}
+
+.btn-terracotta {
+  background-color: var(--accent-orange);
+  color: #FFFFFF;
+  border: none;
+  font-weight: 600;
+  border-radius: var(--radius-btn);
+  padding: 0.6rem 1.3rem;
+  transition: all 0.2s ease;
+}
+
+.btn-terracotta:hover {
+  background-color: #C85A42;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Hero Section */
+.hero-wrapper {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 3rem 2.5rem;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  background: var(--primary-green);
+}
+
+.hero-sub-tag {
+  color: var(--primary-green);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.hero-heading {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+
+.hero-heading span {
+  color: var(--accent-orange);
+}
+
+.hero-lead {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 560px;
+}
+
+/* Feature Cards */
+.card-feature {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 1.75rem 1.25rem;
+  transition: all 0.25s ease;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.card-feature:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-green);
+  box-shadow: var(--shadow-card);
+  color: inherit;
+}
+
+.feature-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--light-green);
+  color: var(--primary-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.feature-icon-orange {
+  background: #FEEBE7;
+  color: var(--accent-orange);
+}
+
+.feature-icon-amber {
+  background: #FEF3E7;
+  color: #D97706;
+}
+
+.feature-icon-blue {
+  background: #E0F2FE;
+  color: #0284C7;
+}
+
+/* Going Away Highlight Box */
+.going-away-banner {
+  background: #FFF8F0;
+  border: 1px solid #F7D0B9;
+  border-radius: var(--radius-card);
+  padding: 2rem;
+  position: relative;
+}
+
+/* Food Marketplace Cards */
+.food-item-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.25s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.food-item-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: #CBD5E1;
+}
+
+.food-card-header {
+  padding: 1rem 1.25rem 0.5rem 1.25rem;
+  background: #FAFAFA;
+  border-bottom: 1px dashed var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.food-category-pill {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.food-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.food-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.food-meta-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.food-meta-info i {
+  color: var(--primary-green);
+}
+
+.price-display {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.price-now {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--primary-green);
+}
+
+.price-was {
+  font-size: 0.9rem;
+  text-decoration: line-through;
+  color: #94A3B8;
+}
+
+.tag-free {
+  background: #DCFCE7;
+  color: #15803D;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+}
+
+.tag-donate {
+  background: #FCE7F3;
+  color: #BE185D;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+}
+
+.tag-discount {
+  background: #FEF3C7;
+  color: #B45309;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+/* Expiry Pills */
+.badge-expiry {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 50px;
+}
+
+.badge-expiry-safe {
+  background: #F0FDF4;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+}
+
+.badge-expiry-urgent {
+  background: #FFFBEB;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+}
+
+.badge-expiry-critical {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+/* Dashboard Stat Cards */
+.dashboard-stat-box {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 1.25rem 1rem;
+  box-shadow: var(--shadow-subtle);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.stat-number {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.stat-title {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+/* Forms & Auth Pages */
+.form-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 2.5rem 2.25rem;
+  box-shadow: 0 16px 36px rgba(27, 67, 50, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card-top-bar {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--primary-green) 0%, var(--accent-green) 50%, var(--warm-amber) 100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.auth-tab-nav {
+  background: #F1F5F9;
+  padding: 4px;
+  border-radius: 12px;
+  display: flex;
+  margin-bottom: 1.5rem;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  text-align: center;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.auth-tab-btn.active {
+  background: #FFFFFF;
+  color: var(--primary-green);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.auth-input-group {
+  position: relative;
+}
+
+.auth-input-icon {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+  color: var(--primary-green);
+  font-size: 1.1rem;
+}
+
+.password-toggle-btn {
+  cursor: pointer;
+  background: #FFFFFF;
+  border-left: none;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: var(--primary-green);
+}
+
+.demo-chip-box {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.demo-chip-pill {
+  background: #FFFFFF;
+  border: 1px solid #86EFAC;
+  color: #166534;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.demo-chip-pill:hover {
+  background: var(--primary-green);
+  color: #FFFFFF;
+  border-color: var(--primary-green);
+  transform: translateY(-1px);
+}
+
+.form-label {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.form-control, .form-select {
+  border-radius: var(--radius-btn);
+  border: 1px solid #CBD5E1;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+}
+
+/* Filter Chips */
+.chip-filter {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.chip-filter:hover, .chip-filter.active {
+  background: var(--primary-green);
+  color: #FFFFFF;
+  border-color: var(--primary-green);
+}
+
+/* Footer */
+footer {
+  background: var(--nav-bg);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 2.5rem 0 1.5rem 0;
+  margin-top: auto;
+  border-top: 3px solid var(--accent-green);
+}
+
+footer a {
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--accent-green);
+}

@@ -1,0 +1,187 @@
+<?php require_once __DIR__ . '/config/db.php'; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Food2Smile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="index.php">
+        <i class="bi bi-heart-pulse-fill me-2 text-warning"></i>Food2<span>Smile</span>
+      </a>
+      <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+          <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="find-food.php">Find Food</a></li>
+          <li class="nav-item"><a class="nav-link" href="share-food.php">Share Food</a></li>
+          <li class="nav-item"><a class="nav-link" href="going-away.php">Going Away</a></li>
+          <li class="nav-item"><a class="nav-link" href="my-foods.php">My Foods</a></li>
+          <li class="nav-item"><a class="nav-link" href="requests.php">Requests</a></li>
+          <li class="nav-item"><a class="nav-link active" href="dashboard.php">Dashboard</a></li>
+        </ul>
+        <div id="navbarAuthSection" class="d-flex align-items-center"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div>
+        <h2 class="fw-bold text-dark mb-1">Impact Dashboard</h2>
+        <p class="text-muted mb-0">Track real-time community & personal surplus food sharing stats.</p>
+      </div>
+      
+      <div class="d-flex align-items-center gap-2">
+        <!-- View Toggle Nav -->
+        <div class="auth-tab-nav mb-0 py-1 px-1">
+          <button type="button" class="auth-tab-btn active py-1 px-3" id="btnViewCommunity" onclick="toggleDashboardView('community')">
+            <i class="bi bi-globe me-1"></i> Community Platform
+          </button>
+          <button type="button" class="auth-tab-btn py-1 px-3" id="btnViewPersonal" onclick="toggleDashboardView('personal')">
+            <i class="bi bi-person-badge me-1"></i> My Personal Stats
+          </button>
+        </div>
+        <a href="share-food.php" class="btn btn-green">+ Share Food</a>
+      </div>
+    </div>
+
+    <!-- Info Banner for New Users -->
+    <div id="dashboardWelcomeNotice" class="alert alert-success border-0 shadow-sm py-2.5 px-3 rounded-3 mb-4 d-flex align-items-center justify-content-between">
+      <div class="small">
+        <i class="bi bi-stars text-warning me-1 fs-5"></i>
+        <span id="welcomeNoticeText">Showing <strong>Overall Community Platform Impact</strong>. Share your first surplus food item to grow your personal impact score!</span>
+      </div>
+      <a href="share-food.php" class="btn btn-sm btn-success rounded-2 ms-2 text-nowrap">Share Food Now</a>
+    </div>
+
+    <!-- 6 Metric Cards -->
+    <div class="row g-3 mb-5">
+      <div class="col-md-4 col-lg-2">
+        <div class="dashboard-stat-box">
+          <div class="stat-icon-circle bg-light text-success">
+            <i class="bi bi-basket3"></i>
+          </div>
+          <div>
+            <div id="statListed" class="stat-number">0</div>
+            <div class="stat-title">Food Listed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-lg-2">
+        <div class="dashboard-stat-box">
+          <div class="stat-icon-circle bg-light text-primary">
+            <i class="bi bi-check-circle"></i>
+          </div>
+          <div>
+            <div id="statAvailable" class="stat-number">0</div>
+            <div class="stat-title">Available</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-lg-2">
+        <div class="dashboard-stat-box">
+          <div class="stat-icon-circle bg-light text-info">
+            <i class="bi bi-currency-rupee"></i>
+          </div>
+          <div>
+            <div id="statSold" class="stat-number">0</div>
+            <div class="stat-title">Food Sold</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-lg-2">
+        <div class="dashboard-stat-box">
+          <div class="stat-icon-circle bg-light text-warning">
+            <i class="bi bi-gift"></i>
+          </div>
+          <div>
+            <div id="statGiven" class="stat-number">0</div>
+            <div class="stat-title">Given Free</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-lg-2">
+        <div class="dashboard-stat-box">
+          <div class="stat-icon-circle bg-light text-danger">
+            <i class="bi bi-heart-fill"></i>
+          </div>
+          <div>
+            <div id="statDonated" class="stat-number">0</div>
+            <div class="stat-title">Donated</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-lg-2">
+        <div class="dashboard-stat-box">
+          <div class="stat-icon-circle bg-light text-success">
+            <i class="bi bi-recycle"></i>
+          </div>
+          <div>
+            <div id="statSaved" class="stat-number">0</div>
+            <div class="stat-title">Food Saved</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="form-card">
+          <h5 class="fw-bold text-dark mb-3 d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-clock-history me-1 text-success"></i> <span id="foodListHeaderTitle">Recent Community Food Listed</span></span>
+            <a href="find-food.php" class="btn btn-sm btn-outline-green py-0 px-2 small">Explore All</a>
+          </h5>
+          <div id="recentFoodsList">
+            <!-- Dynamically populated by js/dashboard.js -->
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="form-card">
+          <h5 class="fw-bold text-dark mb-3 d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-arrow-down-up me-1 text-success"></i> <span id="requestListHeaderTitle">Recent Community Activity</span></span>
+            <a href="requests.php" class="btn btn-sm btn-outline-green py-0 px-2 small">Manage Requests</a>
+          </h5>
+          <div id="recentRequestsList">
+            <!-- Dynamically populated by js/dashboard.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container text-center">
+      <h5 class="fw-bold text-white mb-1"><i class="bi bi-heart-pulse-fill me-1 text-warning"></i> Food2Smile</h5>
+      <p class="small text-white-50 mb-0">Turn Surplus into Smiles. ❤️</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/foods.js"></script>
+  <script src="js/requests.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>
