@@ -1,21 +1,21 @@
 /**
- * Food2Smile - Master Frontend Application Controller (script.js)
- * Asynchronous REST API dispatcher and safe DOM event binding for all 10 pages.
+ * Food2Smile - Master Frontend Application Controller for PHP (script.js)
+ * Asynchronous REST API dispatcher and safe DOM event binding for PHP views.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const path = window.location.pathname.split('/').pop() || 'index.html';
+  const path = window.location.pathname.split('/').pop() || 'index.php';
 
-  if (path === 'index.html' || path === '') initHomePage();
-  if (path === 'share-food.html') { requireAuth(); initShareFoodPage(); }
-  if (path === 'going-away.html') { requireAuth(); initGoingAwayPage(); }
-  if (path === 'find-food.html') initFindFoodPage();
-  if (path === 'food-details.html') initFoodDetailsPage();
-  if (path === 'my-foods.html') { requireAuth(); initMyFoodsPage(); }
-  if (path === 'requests.html') { requireAuth(); initRequestsPage(); }
-  if (path === 'dashboard.html') { requireAuth(); renderDashboardPage(); }
-  if (path === 'login.html') initLoginPage();
-  if (path === 'register.html') initRegisterPage();
+  if (path === 'index.html' || path === 'index.php' || path === '') initHomePage();
+  if (path === 'share-food.html' || path === 'share-food.php') { requireAuth(); initShareFoodPage(); }
+  if (path === 'going-away.html' || path === 'going-away.php') { requireAuth(); initGoingAwayPage(); }
+  if (path === 'find-food.html' || path === 'find-food.php') initFindFoodPage();
+  if (path === 'food-details.html' || path === 'food-details.php') initFoodDetailsPage();
+  if (path === 'my-foods.html' || path === 'my-foods.php') { requireAuth(); initMyFoodsPage(); }
+  if (path === 'requests.html' || path === 'requests.php') { requireAuth(); initRequestsPage(); }
+  if (path === 'dashboard.html' || path === 'dashboard.php') { requireAuth(); renderDashboardPage(); }
+  if (path === 'login.html' || path === 'login.php') initLoginPage();
+  if (path === 'register.html' || path === 'register.php') initRegisterPage();
 });
 
 // HOMEPAGE LOGIC
@@ -306,7 +306,7 @@ async function initFoodDetailsPage() {
 
     const expiry = getExpiryStatus(food.spoilingDate);
     const currentUser = getCurrentUser();
-    const isOwner = currentUser && (currentUser.id === food.owner._id || currentUser.id === food.owner);
+    const isOwner = currentUser && (currentUser.id === food.owner_id || currentUser.id === food.owner);
 
     let smartAdviceHTML = '';
     if (isOwner && expiry.daysLeft === 1) {
@@ -365,206 +365,16 @@ async function initFoodDetailsPage() {
           </div>
         </div>
       </div>
+    `;/div>
     `;
 
     const requestBtn = document.getElementById('requestFoodBtn');
     if (requestBtn) {
       requestBtn.addEventListener('click', () => {
-        sendFoodRequest(food._id || food.id);
+        sendFoodRequest(food.id);
       });
     }
   } catch (err) {
     container.innerHTML = `<div class="alert alert-danger text-center my-5">Failed to load details.</div>`;
-  }
-}
-
-// MY FOODS LOGIC
-function initMyFoodsPage() {
-  const myFoodsList = document.getElementById('myFoodsList');
-  const tabLinks = document.querySelectorAll('#myFoodTabs .nav-link');
-  if (!myFoodsList) return;
-
-  let currentTab = 'Available';
-
-  async function renderMyFoods() {
-    try {
-      const res = await API.get('/foods/my');
-      const foods = res.foods || [];
-      let filtered = foods.filter(f => f.status === currentTab);
-
-      if (currentTab === 'Completed') {
-        filtered = foods.filter(f => f.status === 'Completed' || f.status === 'Sold' || f.status === 'Given' || f.status === 'Donated');
-      }
-
-      if (filtered.length === 0) {
-        myFoodsList.innerHTML = `
-          <div class="col-12 text-center py-5 text-muted">
-            <h5>No listings in '${currentTab}' status.</h5>
-          </div>
-        `;
-        return;
-      }
-
-      myFoodsList.innerHTML = filtered.map(f => {
-        const foodId = f._id || f.id;
-        return `
-          <div class="col-md-6 col-lg-4 mb-4">
-            <div class="food-item-card p-3">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold mb-0">${f.name}</h6>
-                <span class="badge bg-secondary">${f.status}</span>
-              </div>
-              <p class="small text-muted mb-2">${f.category} • ${f.quantity}</p>
-              <div class="fw-bold text-success mb-3">${f.action === 'Free' ? 'FREE' : '₹' + f.finalPrice}</div>
-              <div class="d-flex gap-2">
-                <a href="food-details.html?id=${foodId}" class="btn btn-sm btn-outline-green flex-grow-1">View</a>
-                <button onclick="handleRemoveFood('${foodId}')" class="btn btn-sm btn-outline-danger">Remove</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    } catch (err) {
-      myFoodsList.innerHTML = `<div class="col-12 text-center py-5 text-muted">Failed to load your foods.</div>`;
-    }
-  }
-
-  tabLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      tabLinks.forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-      currentTab = link.getAttribute('data-tab') || 'Available';
-      renderMyFoods();
-    });
-  });
-
-  renderMyFoods();
-}
-
-async function handleRemoveFood(id) {
-  if (await deleteFoodListing(id)) {
-    initMyFoodsPage();
-  }
-}
-
-// REQUESTS PAGE LOGIC
-function initRequestsPage() {
-  const myRequestsContainer = document.getElementById('myRequestsList');
-  const forMyFoodContainer = document.getElementById('requestsForMyFoodList');
-
-  async function renderRequests() {
-    // 1. Sent Requests
-    if (myRequestsContainer) {
-      try {
-        const res = await API.get('/requests/my');
-        const sent = res.requests || [];
-        if (sent.length === 0) {
-          myRequestsContainer.innerHTML = `<p class="text-muted p-3 text-center">No requests sent yet.</p>`;
-        } else {
-          myRequestsContainer.innerHTML = sent.map(r => `
-            <div class="form-card p-3 mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold mb-0">${r.foodName}</h6>
-                <span class="badge ${r.status === 'Accepted' ? 'bg-info text-dark' : (r.status === 'Completed' ? 'bg-success' : (r.status === 'Rejected' ? 'bg-danger' : 'bg-warning text-dark'))}">${r.status}</span>
-              </div>
-              <div class="small text-muted mb-2">Owner: <strong>${r.ownerName}</strong></div>
-            </div>
-          `).join('');
-        }
-      } catch (err) {
-        myRequestsContainer.innerHTML = `<p class="text-muted p-3 text-center">Failed to load sent requests.</p>`;
-      }
-    }
-
-    // 2. Incoming Requests
-    if (forMyFoodContainer) {
-      try {
-        const res = await API.get('/requests/received');
-        const incoming = res.requests || [];
-        if (incoming.length === 0) {
-          forMyFoodContainer.innerHTML = `<p class="text-muted p-3 text-center">No incoming requests for your food yet.</p>`;
-        } else {
-          forMyFoodContainer.innerHTML = incoming.map(r => {
-            const reqId = r._id || r.id;
-            return `
-              <div class="form-card p-3 mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h6 class="fw-bold mb-0">${r.foodName}</h6>
-                  <span class="badge ${r.status === 'Accepted' ? 'bg-info text-dark' : (r.status === 'Completed' ? 'bg-success' : 'bg-warning text-dark')}">${r.status}</span>
-                </div>
-                <div class="small text-muted mb-3">
-                  Requester: <strong>${r.requesterName}</strong>
-                </div>
-                <div class="d-flex gap-2">
-                  ${r.status === 'Pending' ? `
-                    <button onclick="handleRequestAction('${reqId}', 'Accept')" class="btn btn-sm btn-success px-3 rounded-2">Accept</button>
-                    <button onclick="handleRequestAction('${reqId}', 'Reject')" class="btn btn-sm btn-outline-danger px-3 rounded-2">Reject</button>
-                  ` : ''}
-                  ${r.status === 'Accepted' ? `
-                    <button onclick="handleRequestAction('${reqId}', 'Complete')" class="btn btn-sm btn-green px-3 rounded-2">Mark Completed</button>
-                  ` : ''}
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      } catch (err) {
-        forMyFoodContainer.innerHTML = `<p class="text-muted p-3 text-center">Failed to load received requests.</p>`;
-      }
-    }
-  }
-
-  renderRequests();
-}
-
-async function handleRequestAction(reqId, actionStatus) {
-  if (await updateRequestState(reqId, actionStatus)) {
-    initRequestsPage();
-  }
-}
-
-// AUTH PAGES LOGIC
-function initLoginPage() {
-  const form = document.getElementById('loginForm');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const inputVal = document.getElementById('loginPhone')?.value;
-      const pass = document.getElementById('loginPassword')?.value;
-
-      if (!inputVal || !pass) return alert('Please enter login credentials.');
-
-      const res = await loginUser(inputVal, pass);
-      if (res.success) {
-        window.location.href = 'dashboard.html';
-      } else {
-        alert(res.message);
-      }
-    });
-  }
-}
-
-function initRegisterPage() {
-  const form = document.getElementById('registerForm');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('regName')?.value;
-      const inputVal = document.getElementById('regPhone')?.value;
-      const pass = document.getElementById('regPassword')?.value;
-      const confirmPass = document.getElementById('regConfirmPassword')?.value;
-
-      if (!name || !inputVal || !pass || !confirmPass) return alert('All fields are required.');
-      if (pass !== confirmPass) return alert('Passwords do not match.');
-
-      const res = await registerUser(name, inputVal, pass);
-      if (res.success) {
-        alert(res.message);
-        window.location.href = 'login.html';
-      } else {
-        alert(res.message);
-      }
-    });
   }
 }
