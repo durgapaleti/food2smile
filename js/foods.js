@@ -54,14 +54,23 @@ function calculateDiscountPrice(origPrice, pct) {
 
 async function createFoodListing(foodData) {
   if (!isLoggedIn()) {
-    const guestUser = { id: 'u-' + Date.now(), name: 'Durga', phone: '9912351770' };
+    const guestUser = { id: 'u-' + Date.now(), name: 'durga', phone: '9912351770' };
     setCurrentUser(guestUser);
     setToken('demo-token-' + Date.now());
     renderNavbarUser();
   }
 
+  const user = getCurrentUser();
+  const payload = {
+    ...foodData,
+    ownerId: user ? user.id : 'u-101',
+    owner_id: user ? user.id : 'u-101',
+    ownerName: user ? user.name : 'durga',
+    owner_name: user ? user.name : 'durga'
+  };
+
   try {
-    const res = await API.post('/foods', foodData);
+    const res = await API.post('/foods', payload);
     if (res.success) {
       return true;
     }

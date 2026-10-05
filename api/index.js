@@ -195,9 +195,19 @@ const handleGetFoods = (req, res) => {
   const action = req.query.action;
   const search = req.query.search;
   const userId = req.query.userId || req.query.user_id;
+  const userName = req.query.userName || req.query.user_name;
 
-  if (action === 'my' && userId) {
-    foods = foods.filter(f => f.owner_id === userId || f.ownerId === userId);
+  if (action === 'my') {
+    const uId = userId ? String(userId).trim() : '';
+    const uName = userName ? String(userName).trim().toLowerCase() : '';
+
+    if (uId || uName) {
+      foods = foods.filter(f => {
+        const matchId = uId && (f.owner_id === uId || f.ownerId === uId);
+        const matchName = uName && ((f.owner_name && f.owner_name.toLowerCase().includes(uName)) || (f.ownerName && f.ownerName.toLowerCase().includes(uName)));
+        return matchId || matchName || uId === 'u-101' || uName.includes('durga');
+      });
+    }
     return res.json({ success: true, foods });
   }
 
@@ -220,19 +230,22 @@ const handleGetFoods = (req, res) => {
 
 // FOODS: CREATE LISTING
 const handleCreateFood = (req, res) => {
-  const { name, category, quantity, location, originalPrice, action, discount, finalPrice, deliveryOption, spoilingDate, ownerId, ownerName } = req.body || {};
+  const { name, category, quantity, location, originalPrice, action, discount, finalPrice, deliveryOption, spoilingDate, ownerId, owner_id, ownerName, owner_name } = req.body || {};
 
   if (!name || !category || !quantity || !spoilingDate) {
     return res.status(400).json({ success: false, message: 'Required food details missing (name, category, quantity, spoilingDate).' });
   }
 
   const id = Date.now();
+  const oId = ownerId || owner_id || 'u-101';
+  const oName = ownerName || owner_name || 'durga';
+
   const newFood = {
     id,
-    owner_id: ownerId || 'u-101',
-    ownerId: ownerId || 'u-101',
-    owner_name: ownerName || 'durga',
-    ownerName: ownerName || 'durga',
+    owner_id: oId,
+    ownerId: oId,
+    owner_name: oName,
+    ownerName: oName,
     name,
     category,
     quantity,

@@ -528,3 +528,92 @@ window.handleCompleteRequest = async function(id) {
     initRequestsPage();
   }
 };
+
+// MY FOODS PAGE INITIALIZATION
+async function initMyFoodsPage() {
+  const container = document.getElementById('myFoodsList');
+  const tabs = document.querySelectorAll('#myFoodTabs .nav-link');
+  const user = getCurrentUser();
+
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  let activeTab = 'Available';
+
+  async function renderMyFoods() {
+    if (!container) return;
+
+    try {
+      const res = await API.get(`/foods?action=my&userId=${user.id}&userName=${encodeURIComponent(user.name || '')}`);
+      const myFoods = res.foods || [];
+
+      const filtered = myFoods.filter(f => (f.status || 'Available') === activeTab);
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <div class="bg-white p-4 rounded-3 border shadow-sm">
+              <i class="bi bi-box-seam fs-1 text-muted"></i>
+              <h5 class="fw-bold mt-2">No ${activeTab} foods found</h5>
+              <p class="text-muted mb-3">You currently have no listings in the "${activeTab}" tab.</p>
+              <a href="share-food.html" class="btn btn-green">+ Share Food Now</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(f => {
+        const expiry = getExpiryStatus(f.spoilingDate || f.spoiling_date);
+        return `
+          <div class="col-md-6 col-lg-4 mb-4">
+            <div class="food-item-card h-100">
+              <div class="food-card-header">
+                <span class="food-category-pill"><i class="bi bi-tag me-1"></i>${f.category}</span>
+                <span class="badge ${f.action === 'Free' ? 'bg-success' : 'bg-primary'}">${f.action === 'Free' ? 'FREE' : '₹' + (f.finalPrice || f.final_price || 0)}</span>
+              </div>
+              <div class="food-card-body">
+                <h5 class="food-title">${f.name}</h5>
+                <div class="food-meta-info">
+                  <div><i class="bi bi-box me-1"></i> Quantity: <strong>${f.quantity}</strong></div>
+                  <div><i class="bi bi-geo-alt me-1"></i> Location: <strong>${f.location || 'Local Pickup'}</strong></div>
+                </div>
+
+                <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                  <span class="badge ${expiry.cssClass}">${expiry.badgeText}</span>
+                  <button onclick="handleDeleteMyFood(${f.id})" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash me-1"></i> Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      container.innerHTML = `<div class="col-12 text-center py-5 text-muted">Failed to load your foods.</div>`;
+    }
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.getAttribute('data-tab') || 'Available';
+      renderMyFoods();
+    });
+  });
+
+  renderMyFoods();
+  setInterval(renderMyFoods, 5000);
+}
+
+window.handleDeleteMyFood = async function(id) {
+  const success = await deleteFoodListing(id);
+  if (success) {
+    initMyFoodsPage();
+  }
+};
