@@ -386,3 +386,145 @@ async function initFoodDetailsPage() {
     container.innerHTML = `<div class="alert alert-danger text-center my-5">Failed to load details.</div>`;
   }
 }
+
+// REQUESTS PAGE INITIALIZATION
+async function initRequestsPage() {
+  const incomingContainer = document.getElementById('requestsForMyFoodList');
+  const outgoingContainer = document.getElementById('myRequestsList');
+  const user = getCurrentUser();
+
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  async function loadRequests() {
+    try {
+      // 1. Incoming requests for foods listed by current user
+      const incomingRes = await API.get(`/requests?action=received&userId=${user.id}`);
+      const incomingRequests = incomingRes.requests || [];
+
+      if (incomingContainer) {
+        if (incomingRequests.length === 0) {
+          incomingContainer.innerHTML = `
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+              No incoming requests for your shared food yet.
+            </div>
+          `;
+        } else {
+          incomingContainer.innerHTML = incomingRequests.map(r => `
+            <div class="card mb-3 border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-1">${r.foodName || r.food_name || 'Surplus Food'}</h5>
+                    <span class="badge bg-light text-dark border me-1">${r.category || 'General'}</span>
+                    <span class="badge ${r.action === 'Free' ? 'bg-success' : 'bg-primary'}">${r.action === 'Free' ? 'FREE' : '₹' + (r.price || 0)}</span>
+                  </div>
+                  <span class="badge ${r.status === 'Accepted' ? 'bg-info text-dark' : (r.status === 'Completed' ? 'bg-success' : (r.status === 'Rejected' ? 'bg-danger' : 'bg-warning text-dark'))}">
+                    ${r.status}
+                  </span>
+                </div>
+                <p class="small text-muted mb-2">
+                  Requested by: <strong>${r.requesterName || r.requester_name || 'Neighbor'}</strong> 
+                  (${r.requesterPhone || r.requester_phone || '9876543210'})
+                </p>
+
+                ${r.status === 'Pending' ? `
+                  <div class="d-flex gap-2 mt-3">
+                    <button onclick="handleAcceptRequest(${r.id})" class="btn btn-sm btn-green px-3">
+                      <i class="bi bi-check-circle me-1"></i> Accept Request
+                    </button>
+                    <button onclick="handleRejectRequest(${r.id})" class="btn btn-sm btn-outline-danger px-3">
+                      <i class="bi bi-x-circle me-1"></i> Reject
+                    </button>
+                  </div>
+                ` : (r.status === 'Accepted' ? `
+                  <div class="d-flex gap-2 mt-3 align-items-center">
+                    <button onclick="handleCompleteRequest(${r.id})" class="btn btn-sm btn-success px-3">
+                      <i class="bi bi-check-all me-1"></i> Mark Completed
+                    </button>
+                    <a href="tel:${r.requesterPhone || '9876543210'}" class="btn btn-sm btn-outline-primary px-3">
+                      <i class="bi bi-telephone me-1"></i> Call Requester
+                    </a>
+                  </div>
+                ` : ``)}
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      // 2. Outgoing requests sent by current user
+      const outgoingRes = await API.get(`/requests?action=my&userId=${user.id}`);
+      const outgoingRequests = outgoingRes.requests || [];
+
+      if (outgoingContainer) {
+        if (outgoingRequests.length === 0) {
+          outgoingContainer.innerHTML = `
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-send fs-2 d-block mb-2"></i>
+              You haven't requested any food items yet.
+            </div>
+          `;
+        } else {
+          outgoingContainer.innerHTML = outgoingRequests.map(r => `
+            <div class="card mb-3 border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-1">${r.foodName || r.food_name || 'Surplus Food'}</h5>
+                    <span class="badge bg-light text-dark border me-1">${r.category || 'General'}</span>
+                    <span class="badge ${r.action === 'Free' ? 'bg-success' : 'bg-primary'}">${r.action === 'Free' ? 'FREE' : '₹' + (r.price || 0)}</span>
+                  </div>
+                  <span class="badge ${r.status === 'Accepted' ? 'bg-info text-dark' : (r.status === 'Completed' ? 'bg-success' : (r.status === 'Rejected' ? 'bg-danger' : 'bg-warning text-dark'))}">
+                    ${r.status}
+                  </span>
+                </div>
+                <p class="small text-muted mb-0">
+                  Listed by Owner: <strong>${r.ownerName || r.owner_name || 'Community Member'}</strong>
+                </p>
+                ${r.status === 'Accepted' ? `
+                  <div class="alert alert-info py-2 px-3 mt-2 mb-0 small">
+                    <i class="bi bi-check-circle me-1"></i> Owner accepted your request! Connect to arrange pickup.
+                  </div>
+                ` : ``}
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load requests:', err);
+    }
+  }
+
+  loadRequests();
+  // Auto-sync requests every 5 seconds for real-time notifications across devices
+  setInterval(loadRequests, 5000);
+}
+
+// Global action handlers
+window.handleAcceptRequest = async function(id) {
+  const success = await updateRequestState(id, 'accept');
+  if (success) {
+    alert('Request accepted! The requester can now arrange pickup with you.');
+    initRequestsPage();
+  }
+};
+
+window.handleRejectRequest = async function(id) {
+  const success = await updateRequestState(id, 'reject');
+  if (success) {
+    initRequestsPage();
+  }
+};
+
+window.handleCompleteRequest = async function(id) {
+  const success = await updateRequestState(id, 'complete');
+  if (success) {
+    alert('Food sharing transaction completed!');
+    initRequestsPage();
+  }
+};

@@ -342,24 +342,38 @@ app.all(['/api/requests.php', '/requests.php'], (req, res) => {
 // DASHBOARD: STATS
 const handleDashboard = (req, res) => {
   purgeExpired();
-  const foods = db.foods;
-  const requests = db.requests;
+  const foods = db.foods || [];
+  const requests = db.requests || [];
+  const userId = req.query.userId || req.query.user_id;
 
-  const stats = {
-    totalListed: foods.length,
-    availableCount: foods.filter(f => f.status === 'Available').length,
-    soldCount: foods.filter(f => f.status === 'Sold').length,
-    givenCount: foods.filter(f => f.status === 'Given' || (f.action === 'Free' && f.status === 'Completed')).length,
-    donatedCount: foods.filter(f => f.status === 'Donated' || (f.action === 'Donate' && f.status === 'Completed')).length,
-    savedCount: foods.filter(f => f.status === 'Completed' || f.status === 'Sold' || f.status === 'Given' || f.status === 'Donated').length,
-    recentFoods: foods.slice(0, 5),
-    recentRequests: requests.slice(0, 5)
-  };
+  const userFoods = userId ? foods.filter(f => f.owner_id === userId || f.ownerId === userId) : foods;
+  const userRequests = userId ? requests.filter(r => r.requester_id === userId || r.requesterId === userId || r.owner_id === userId || r.ownerId === userId) : requests;
 
-  res.json({ success: true, stats });
+  const calcMetrics = (foodList, reqList) => ({
+    totalListed: foodList.length,
+    listedCount: foodList.length,
+    availableCount: foodList.filter(f => f.status === 'Available').length,
+    soldCount: foodList.filter(f => f.status === 'Sold').length,
+    givenCount: foodList.filter(f => f.status === 'Given' || (f.action === 'Free' && f.status === 'Completed')).length,
+    donatedCount: foodList.filter(f => f.status === 'Donated' || (f.action === 'Donate' && f.status === 'Completed')).length,
+    savedCount: foodList.filter(f => f.status === 'Completed' || f.status === 'Sold' || f.status === 'Given' || f.status === 'Donated').length
+  });
+
+  const stats = calcMetrics(userFoods, userRequests);
+  const communityStats = calcMetrics(foods, requests);
+
+  res.json({
+    success: true,
+    stats,
+    communityStats,
+    recentFoods: userFoods.slice(0, 5),
+    recentRequests: userRequests.slice(0, 5),
+    communityFoods: foods.slice(0, 5),
+    communityRequests: requests.slice(0, 5)
+  });
 };
 
-app.get('/api/dashboard', handleDashboard);
+app.get(['/api/dashboard', '/api/dashboard/stats'], handleDashboard);
 app.all(['/api/dashboard.php', '/dashboard.php'], handleDashboard);
 
 module.exports = app;

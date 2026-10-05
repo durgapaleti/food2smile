@@ -1,5 +1,5 @@
 /**
- * Food2Smile - Requests Module (requests.js)
+ * Food2Smile - Requests Module (js/requests.js)
  * REST API Integration for creating, accepting, rejecting, and completing food requests.
  */
 
@@ -10,8 +10,15 @@ async function sendFoodRequest(foodId) {
     return false;
   }
 
+  const user = getCurrentUser();
+
   try {
-    const res = await API.post('/requests', { foodId });
+    const res = await API.post('/requests', {
+      foodId,
+      requesterId: user ? user.id : 'u-102',
+      requesterName: user ? user.name : 'Interested Neighbor',
+      requesterPhone: user ? (user.phone || user.email) : '9876543210'
+    });
     if (res.success) {
       alert('Request submitted successfully! The owner will review your request.');
       return true;
@@ -26,8 +33,10 @@ async function sendFoodRequest(foodId) {
 
 async function updateRequestState(requestId, actionStatus) {
   try {
-    const endpoint = `/requests/${requestId}/${actionStatus.toLowerCase()}`;
-    const res = await API.put(endpoint);
+    const res = await API.post('/requests/action', {
+      id: requestId,
+      action: actionStatus.toLowerCase()
+    });
     if (res.success) {
       return true;
     }
