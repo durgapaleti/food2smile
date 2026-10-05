@@ -280,6 +280,8 @@ function initFindFoodPage() {
   if (sortSelect) sortSelect.addEventListener('change', filterAndRender);
 
   filterAndRender();
+  // Auto-sync polling every 5 seconds for live multi-user sync across devices
+  setInterval(filterAndRender, 5000);
 }
 
 // FOOD DETAILS LOGIC
