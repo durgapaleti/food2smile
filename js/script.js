@@ -213,17 +213,20 @@ function initFindFoodPage() {
 
   let activeCategory = 'All';
   let activeAction = 'All';
+  let isFirstLoad = true;
 
   async function filterAndRender() {
     if (!foodGrid) return;
 
-    foodGrid.innerHTML = `
-      <div class="col-12 text-center py-5">
-        <div class="spinner-border text-success" role="status">
-          <span class="visually-hidden">Loading food marketplace...</span>
+    if (isFirstLoad) {
+      foodGrid.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading food marketplace...</span>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
 
     try {
       const query = searchInput?.value.trim() || '';
@@ -253,7 +256,11 @@ function initFindFoodPage() {
 
       foodGrid.innerHTML = foods.map(f => renderFoodCardHTML(f)).join('');
     } catch (err) {
-      foodGrid.innerHTML = `<div class="col-12 text-center py-5 text-muted">Failed to load marketplace foods.</div>`;
+      if (isFirstLoad) {
+        foodGrid.innerHTML = `<div class="col-12 text-center py-5 text-muted">Failed to load marketplace foods.</div>`;
+      }
+    } finally {
+      isFirstLoad = false;
     }
   }
 

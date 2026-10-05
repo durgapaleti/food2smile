@@ -9,133 +9,179 @@ const API_BASE_URL = 'api';
 
 const API = {
   async get(endpoint) {
-    let url = `${API_BASE_URL}${endpoint}`;
-    if (endpoint.startsWith('/auth/')) {
-      url = `${API_BASE_URL}/auth.php?action=${endpoint.replace('/auth/', '')}`;
-    } else if (endpoint.startsWith('/foods/my')) {
-      url = `${API_BASE_URL}/foods.php?action=my`;
-    } else if (endpoint.startsWith('/foods/')) {
-      url = `${API_BASE_URL}/foods.php?id=${endpoint.replace('/foods/', '')}`;
-    } else if (endpoint.startsWith('/foods?')) {
-      url = `${API_BASE_URL}/foods.php?${endpoint.replace('/foods?', '')}`;
-    } else if (endpoint === '/foods') {
-      url = `${API_BASE_URL}/foods.php`;
-    } else if (endpoint.startsWith('/requests/my')) {
-      url = `${API_BASE_URL}/requests.php?action=my`;
-    } else if (endpoint.startsWith('/requests/received')) {
-      url = `${API_BASE_URL}/requests.php?action=received`;
-    } else if (endpoint.startsWith('/dashboard/stats') || endpoint.startsWith('/dashboard')) {
-      url = `${API_BASE_URL}/dashboard.php`;
-    }
-
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const primaryUrl = `${API_BASE_URL}${cleanEndpoint}`;
+    
+    // 1. Try Vercel / Node REST endpoint first
     try {
-      const response = await fetch(url, {
+      const response = await fetch(primaryUrl, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        credentials: 'same-origin'
+        headers: { 'Accept': 'application/json' }
       });
       if (response.ok) {
         const data = await response.json();
         if (data && typeof data === 'object') return data;
       }
-    } catch (err) {
-      // Fallback silently to client engine
+    } catch (err) {}
+
+    // 2. Try legacy PHP url format if applicable
+    let phpUrl = `${API_BASE_URL}${cleanEndpoint}`;
+    if (cleanEndpoint.startsWith('/auth/')) {
+      phpUrl = `${API_BASE_URL}/auth.php?action=${cleanEndpoint.replace('/auth/', '')}`;
+    } else if (cleanEndpoint.startsWith('/foods/my')) {
+      phpUrl = `${API_BASE_URL}/foods.php?action=my`;
+    } else if (cleanEndpoint.startsWith('/foods/')) {
+      phpUrl = `${API_BASE_URL}/foods.php?id=${cleanEndpoint.replace('/foods/', '')}`;
+    } else if (cleanEndpoint.startsWith('/foods?')) {
+      phpUrl = `${API_BASE_URL}/foods.php?${cleanEndpoint.replace('/foods?', '')}`;
+    } else if (cleanEndpoint === '/foods') {
+      phpUrl = `${API_BASE_URL}/foods.php`;
+    } else if (cleanEndpoint.startsWith('/requests/my')) {
+      phpUrl = `${API_BASE_URL}/requests.php?action=my`;
+    } else if (cleanEndpoint.startsWith('/requests/received')) {
+      phpUrl = `${API_BASE_URL}/requests.php?action=received`;
+    } else if (cleanEndpoint.startsWith('/dashboard/stats') || cleanEndpoint.startsWith('/dashboard')) {
+      phpUrl = `${API_BASE_URL}/dashboard.php`;
     }
 
-    // LOCAL STORAGE FALLBACK ENGINE FOR GET
+    try {
+      const response = await fetch(phpUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && typeof data === 'object') return data;
+      }
+    } catch (err) {}
+
+    // 3. Fallback to LocalEngine for offline static use
     return LocalEngine.get(endpoint);
   },
 
   async post(endpoint, data = {}) {
-    let url = `${API_BASE_URL}${endpoint}`;
-    if (endpoint === '/auth/register') {
-      url = `${API_BASE_URL}/auth.php?action=register`;
-    } else if (endpoint === '/auth/login') {
-      url = `${API_BASE_URL}/auth.php?action=login`;
-    } else if (endpoint === '/auth/logout') {
-      url = `${API_BASE_URL}/auth.php?action=logout`;
-    } else if (endpoint === '/foods') {
-      url = `${API_BASE_URL}/foods.php`;
-    } else if (endpoint === '/requests') {
-      url = `${API_BASE_URL}/requests.php`;
-    }
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const primaryUrl = `${API_BASE_URL}${cleanEndpoint}`;
 
+    // 1. Try Vercel / Node REST endpoint first
     try {
-      const response = await fetch(url, {
+      const response = await fetch(primaryUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(data)
       });
       if (response.ok) {
         const result = await response.json();
         if (result && typeof result === 'object') return result;
       }
-    } catch (err) {
-      // Fallback silently to client engine
+    } catch (err) {}
+
+    // 2. Try PHP backend fallback
+    let phpUrl = `${API_BASE_URL}${cleanEndpoint}`;
+    if (cleanEndpoint === '/auth/register') {
+      phpUrl = `${API_BASE_URL}/auth.php?action=register`;
+    } else if (cleanEndpoint === '/auth/login') {
+      phpUrl = `${API_BASE_URL}/auth.php?action=login`;
+    } else if (cleanEndpoint === '/auth/logout') {
+      phpUrl = `${API_BASE_URL}/auth.php?action=logout`;
+    } else if (cleanEndpoint === '/foods') {
+      phpUrl = `${API_BASE_URL}/foods.php`;
+    } else if (cleanEndpoint === '/requests') {
+      phpUrl = `${API_BASE_URL}/requests.php`;
+    } else if (cleanEndpoint === '/requests/action') {
+      phpUrl = `${API_BASE_URL}/requests.php?action=${data.action}&id=${data.id}`;
     }
 
-    // LOCAL STORAGE FALLBACK ENGINE FOR POST
+    try {
+      const response = await fetch(phpUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result && typeof result === 'object') return result;
+      }
+    } catch (err) {}
+
+    // 3. LocalEngine fallback
     return LocalEngine.post(endpoint, data);
   },
 
   async put(endpoint, data = {}) {
-    let url = `${API_BASE_URL}${endpoint}`;
-    if (endpoint.includes('/accept')) {
-      const id = endpoint.match(/\/requests\/(\d+)\/accept/)[1];
-      url = `${API_BASE_URL}/requests.php?action=accept&id=${id}`;
-    } else if (endpoint.includes('/reject')) {
-      const id = endpoint.match(/\/requests\/(\d+)\/reject/)[1];
-      url = `${API_BASE_URL}/requests.php?action=reject&id=${id}`;
-    } else if (endpoint.includes('/complete')) {
-      const id = endpoint.match(/\/requests\/(\d+)\/complete/)[1];
-      url = `${API_BASE_URL}/requests.php?action=complete&id=${id}`;
-    }
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const primaryUrl = `${API_BASE_URL}${cleanEndpoint}`;
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(primaryUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(data)
       });
       if (response.ok) {
         const result = await response.json();
         if (result && typeof result === 'object') return result;
       }
-    } catch (err) {
-      // Fallback silently to client engine
+    } catch (err) {}
+
+    let phpUrl = `${API_BASE_URL}${cleanEndpoint}`;
+    if (cleanEndpoint.includes('/accept')) {
+      const id = cleanEndpoint.match(/\/requests\/(\d+)\/accept/)[1];
+      phpUrl = `${API_BASE_URL}/requests.php?action=accept&id=${id}`;
+    } else if (cleanEndpoint.includes('/reject')) {
+      const id = cleanEndpoint.match(/\/requests\/(\d+)\/reject/)[1];
+      phpUrl = `${API_BASE_URL}/requests.php?action=reject&id=${id}`;
+    } else if (cleanEndpoint.includes('/complete')) {
+      const id = cleanEndpoint.match(/\/requests\/(\d+)\/complete/)[1];
+      phpUrl = `${API_BASE_URL}/requests.php?action=complete&id=${id}`;
     }
+
+    try {
+      const response = await fetch(phpUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result && typeof result === 'object') return result;
+      }
+    } catch (err) {}
 
     return LocalEngine.put(endpoint, data);
   },
 
   async delete(endpoint) {
-    let url = `${API_BASE_URL}${endpoint}`;
-    if (endpoint.startsWith('/foods/')) {
-      const id = endpoint.replace('/foods/', '');
-      url = `${API_BASE_URL}/foods.php?action=delete&id=${id}`;
-    }
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const primaryUrl = `${API_BASE_URL}${cleanEndpoint}`;
 
     try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        credentials: 'same-origin'
+      const response = await fetch(primaryUrl, {
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json' }
       });
       if (response.ok) {
         const result = await response.json();
         if (result && typeof result === 'object') return result;
       }
-    } catch (err) {
-      // Fallback silently to client engine
+    } catch (err) {}
+
+    let phpUrl = `${API_BASE_URL}${cleanEndpoint}`;
+    if (cleanEndpoint.startsWith('/foods/')) {
+      const id = cleanEndpoint.replace('/foods/', '');
+      phpUrl = `${API_BASE_URL}/foods.php?action=delete&id=${id}`;
     }
+
+    try {
+      const response = await fetch(phpUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result && typeof result === 'object') return result;
+      }
+    } catch (err) {}
 
     return LocalEngine.delete(endpoint);
   }
