@@ -1,0 +1,83 @@
+{
+  "users": [
+    { "id": "u-101", "name": "durga", "phone": "9912351770", "email": "durga@food2smile.com", "passwordHash": "password123" },
+    { "id": "u-102", "name": "Priya Verma", "phone": "9876543211", "email": "priya@gmail.com", "passwordHash": "password123" }
+  ],
+  "foods": [
+    {
+      "id": 101,
+      "owner_id": "u-101",
+      "ownerId": "u-101",
+      "owner_name": "durga",
+      "ownerName": "durga",
+      "name": "Fresh Organic Tomatoes",
+      "category": "Vegetables",
+      "quantity": "3 kg",
+      "location": "Koramangala, Bangalore",
+      "original_price": 120,
+      "originalPrice": 120,
+      "action": "Free",
+      "discount": 100,
+      "final_price": 0,
+      "finalPrice": 0,
+      "delivery_option": "Self Pickup",
+      "deliveryOption": "Self Pickup",
+      "spoiling_date": "2026-10-10",
+      "spoilingDate": "2026-10-10",
+      "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=80",
+      "description": "Harvested yesterday from home garden.",
+      "status": "Available",
+      "created_at": "2026-10-05T08:00:00.000Z",
+      "createdAt": "2026-10-05T08:00:00.000Z"
+    },
+    {
+      "id": 102,
+      "owner_id": "u-102",
+      "ownerId": "u-102",
+      "owner_name": "Priya Verma",
+      "ownerName": "Priya Verma",
+      "name": "Whole Wheat Fresh Bread",
+      "category": "Bakery",
+      "quantity": "2 Loaves",
+      "location": "Indiranagar, Bangalore",
+      "original_price": 90,
+      "originalPrice": 90,
+      "action": "Discount",
+      "discount": 50,
+      "final_price": 45,
+      "finalPrice": 45,
+      "delivery_option": "Self Pickup",
+      "deliveryOption": "Self Pickup",
+      "spoiling_date": "2026-10-08",
+      "spoilingDate": "2026-10-08",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80",
+      "description": "Freshly baked artisanal whole wheat bread.",
+      "status": "Available",
+      "created_at": "2026-10-05T08:00:00.000Z",
+      "createdAt": "2026-10-05T08:00:00.000Z"
+    }
+  ],
+  "requests": [
+    {
+      "id": 201,
+      "food_id": 101,
+      "foodId": 101,
+      "food_name": "Fresh Organic Tomatoes",
+      "foodName": "Fresh Organic Tomatoes",
+      "category": "Vegetables",
+      "action": "Free",
+      "price": 0,
+      "requester_id": "u-102",
+      "requesterId": "u-102",
+      "requester_name": "Priya Verma",
+      "requesterName": "Priya Verma",
+      "requester_phone": "9876543211",
+      "owner_id": "u-101",
+      "ownerId": "u-101",
+      "owner_name": "durga",
+      "ownerName": "durga",
+      "status": "Pending",
+      "created_at": "2026-10-05"
+    }
+  ]
+}

@@ -9,7 +9,7 @@ const API_BASE_URL = 'api';
 const FIREBASE_URL_KEY = 'food2smile_firebase_url';
 
 function getFirebaseDbUrl() {
-  return window.FOOD2SMILE_FIREBASE_URL || localStorage.getItem(FIREBASE_URL_KEY) || '';
+  return window.FOOD2SMILE_FIREBASE_URL || localStorage.getItem(FIREBASE_URL_KEY) || 'https://food2smile-9ea0b-default-rtdb.firebaseio.com';
 }
 
 function setFirebaseDbUrl(url) {
@@ -232,7 +232,17 @@ const API = {
       });
       if (response.ok) {
         const data = await response.json();
-        if (data && typeof data === 'object') return data;
+        if (data && typeof data === 'object') {
+          if (cleanEndpoint.startsWith('/foods') && data.foods && Array.isArray(data.foods)) {
+            const localRes = LocalEngine.get(cleanEndpoint);
+            const localFoods = (localRes && localRes.foods) || [];
+            const combinedMap = new Map();
+            (localFoods || []).forEach(f => combinedMap.set(String(f.id), f));
+            (data.foods || []).forEach(f => combinedMap.set(String(f.id), f));
+            return { success: true, foods: Array.from(combinedMap.values()) };
+          }
+          return data;
+        }
       }
     } catch (err) {}
 
@@ -370,8 +380,7 @@ const API = {
     } catch (err) {}
 
     return LocalEngine.put(endpoint, data);
-  }
-};,
+  },
 
   async delete(endpoint) {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;

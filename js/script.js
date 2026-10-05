@@ -56,7 +56,11 @@ function initShareFoodPage() {
   const spoilingWarningAlert = document.getElementById('spoilingWarningAlert');
 
   if (spoilingDateInput) {
+    const defaultDate = new Date();
+    defaultDate.setDate(defaultDate.getDate() + 3);
+    spoilingDateInput.value = defaultDate.toISOString().split('T')[0];
     spoilingDateInput.min = new Date().toISOString().split('T')[0];
+
     spoilingDateInput.addEventListener('change', () => {
       const dateVal = spoilingDateInput.value;
       if (!dateVal) return;
