@@ -309,8 +309,23 @@ async function initFoodDetailsPage() {
   }
 
   try {
+    let food = null;
     const res = await API.get(`/foods/${foodId}`);
-    const food = res.food;
+    if (res && res.success && res.food) {
+      food = res.food;
+    }
+
+    if (!food) {
+      const allRes = await API.get('/foods');
+      const allFoods = (allRes && allRes.foods) || [];
+      food = allFoods.find(f => f.id == foodId || f._id == foodId);
+    }
+
+    if (!food && typeof LocalEngine !== 'undefined') {
+      const localRes = LocalEngine.get('/foods');
+      const localFoods = (localRes && localRes.foods) || [];
+      food = localFoods.find(f => f.id == foodId || f._id == foodId);
+    }
 
     if (!food) {
       container.innerHTML = `<div class="alert alert-danger text-center my-5">Food listing not found.</div>`;
