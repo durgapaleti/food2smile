@@ -365,7 +365,6 @@ async function initFoodDetailsPage() {
           </div>
         </div>
       </div>
-    `;/div>
     `;
 
     const requestBtn = document.getElementById('requestFoodBtn');
