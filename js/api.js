@@ -142,15 +142,94 @@ const API = {
 };
 
 /**
+ * Safe Helper Utilities for LocalEngine
+ */
+function safeLoadJSON(key, defaultVal = []) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : defaultVal;
+  } catch (e) {
+    return defaultVal;
+  }
+}
+
+function safeSaveJSON(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {}
+}
+
+function safeInitDemo() {
+  if (typeof initializeDemoData === 'function') {
+    initializeDemoData();
+  } else {
+    const existing = localStorage.getItem('foods');
+    if (!existing || JSON.parse(existing).length === 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const initialFoods = [
+        {
+          id: 101,
+          ownerId: 'u-101',
+          ownerName: 'FunPanda',
+          name: 'Fresh Organic Tomatoes',
+          category: 'Vegetables',
+          quantity: '2 kg',
+          location: 'Hostel Block B',
+          originalPrice: 100,
+          action: 'Discount',
+          discount: 30,
+          finalPrice: 70,
+          deliveryOption: 'Self Pickup',
+          spoilingDate: today,
+          status: 'Available',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 102,
+          ownerId: 'u-102',
+          ownerName: 'Ananya Sharma',
+          name: 'Devgad Alphonso Mangoes',
+          category: 'Fruits',
+          quantity: '1 dozen',
+          location: 'Sector 14 Apartments',
+          originalPrice: 120,
+          action: 'Free',
+          discount: 0,
+          finalPrice: 0,
+          deliveryOption: 'Self Pickup',
+          spoilingDate: today,
+          status: 'Available',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      safeSaveJSON('foods', initialFoods);
+      safeSaveJSON('users', [
+        { id: 'u-101', name: 'FunPanda', phone: '9876543210', password: 'password123' },
+        { id: 'u-102', name: 'Ananya Sharma', phone: '9912351770', password: 'password123' }
+      ]);
+    }
+  }
+}
+
+function safeGetUsers() { return typeof getUsers === 'function' ? getUsers() : safeLoadJSON('users', []); }
+function safeSaveUsers(users) { typeof saveUsers === 'function' ? saveUsers(users) : safeSaveJSON('users', users); }
+function safeGetFoods() { return typeof getFoods === 'function' ? getFoods() : safeLoadJSON('foods', []); }
+function safeSaveFoods(foods) { typeof saveFoods === 'function' ? saveFoods(foods) : safeSaveJSON('foods', foods); }
+function safeGetRequests() { return typeof getRequests === 'function' ? getRequests() : safeLoadJSON('requests', []); }
+function safeSaveRequests(reqs) { typeof saveRequests === 'function' ? saveRequests(reqs) : safeSaveJSON('requests', reqs); }
+function safeGetCurrentUser() { return typeof getCurrentUser === 'function' ? getCurrentUser() : safeLoadJSON('currentUser', null); }
+function safeSetCurrentUser(user) { typeof setCurrentUser === 'function' ? setCurrentUser(user) : safeSaveJSON('currentUser', user); }
+
+/**
  * Client Storage Fallback Engine (Guarantees zero downtime on Vercel/GitHub Pages)
  */
 const LocalEngine = {
   get(endpoint) {
-    initializeDemoData();
-    const currentUser = getCurrentUser();
+    safeInitDemo();
+    const currentUser = safeGetCurrentUser();
 
     if (endpoint.startsWith('/foods')) {
-      let foods = getFoods();
+      let foods = safeGetFoods();
 
       // Query params parsing
       if (endpoint.includes('?')) {
@@ -191,7 +270,7 @@ const LocalEngine = {
     }
 
     if (endpoint.startsWith('/requests')) {
-      const allRequests = getRequests();
+      const allRequests = safeGetRequests();
       if (!currentUser) return { success: true, requests: [] };
 
       if (endpoint.includes('action=my')) {
@@ -206,8 +285,8 @@ const LocalEngine = {
     }
 
     if (endpoint.startsWith('/dashboard')) {
-      const foods = getFoods();
-      const requests = getRequests();
+      const foods = safeGetFoods();
+      const requests = safeGetRequests();
 
       const stats = {
         totalListed: foods.length,
@@ -227,11 +306,11 @@ const LocalEngine = {
   },
 
   post(endpoint, data) {
-    initializeDemoData();
-    const currentUser = getCurrentUser();
+    safeInitDemo();
+    const currentUser = safeGetCurrentUser();
 
     if (endpoint === '/auth/register') {
-      const users = getUsers();
+      const users = safeGetUsers();
       const identifier = (data.phone || data.email || '').trim();
       const existing = users.find(u => (data.phone && u.phone === data.phone) || (data.email && u.email === data.email));
 
@@ -248,15 +327,15 @@ const LocalEngine = {
       };
 
       users.push(newUser);
-      saveUsers(users);
-      setCurrentUser(newUser);
+      safeSaveUsers(users);
+      safeSetCurrentUser(newUser);
       setToken('demo-token-' + Date.now());
 
       return { success: true, message: 'Account created successfully!', user: newUser, token: getToken() };
     }
 
     if (endpoint === '/auth/login') {
-      const users = getUsers();
+      const users = safeGetUsers();
       const idVal = (data.phone || data.email || '').trim();
       let user = users.find(u => u.phone === idVal || u.email === idVal);
 
@@ -269,16 +348,16 @@ const LocalEngine = {
           email: idVal.includes('@') ? idVal : 'durga@food2smile.com'
         };
         users.push(user);
-        saveUsers(users);
+        safeSaveUsers(users);
       }
 
-      setCurrentUser(user);
+      safeSetCurrentUser(user);
       setToken('demo-token-' + Date.now());
       return { success: true, user, token: getToken() };
     }
 
     if (endpoint === '/foods') {
-      const foods = getFoods();
+      const foods = safeGetFoods();
       const user = currentUser || { id: 'u-101', name: 'FunPanda' };
 
       const newFood = {
@@ -301,13 +380,13 @@ const LocalEngine = {
       };
 
       foods.unshift(newFood);
-      saveFoods(foods);
+      safeSaveFoods(foods);
       return { success: true, message: 'Food listed successfully!', food: newFood };
     }
 
     if (endpoint === '/requests') {
-      const requests = getRequests();
-      const foods = getFoods();
+      const requests = safeGetRequests();
+      const foods = safeGetFoods();
       const food = foods.find(f => f.id == data.foodId || f.id == data.food_id);
       const user = currentUser || { id: 'u-102', name: 'Priya Verma', phone: '9123456789' };
 
@@ -328,7 +407,7 @@ const LocalEngine = {
       };
 
       requests.unshift(newReq);
-      saveRequests(requests);
+      safeSaveRequests(requests);
       return { success: true, message: 'Request sent successfully!', request: newReq };
     }
 
@@ -336,30 +415,30 @@ const LocalEngine = {
   },
 
   put(endpoint, data) {
-    const requests = getRequests();
-    const foods = getFoods();
+    const requests = safeGetRequests();
+    const foods = safeGetFoods();
 
     if (endpoint.includes('/accept')) {
       const id = endpoint.match(/\/requests\/(\d+)\/accept/)[1];
       const req = requests.find(r => r.id == id);
       if (req) {
         req.status = 'Accepted';
-        saveRequests(requests);
+        safeSaveRequests(requests);
         const food = foods.find(f => f.id == req.foodId);
-        if (food) { food.status = 'Requested'; saveFoods(foods); }
+        if (food) { food.status = 'Requested'; safeSaveFoods(foods); }
       }
     } else if (endpoint.includes('/reject')) {
       const id = endpoint.match(/\/requests\/(\d+)\/reject/)[1];
       const req = requests.find(r => r.id == id);
-      if (req) { req.status = 'Rejected'; saveRequests(requests); }
+      if (req) { req.status = 'Rejected'; safeSaveRequests(requests); }
     } else if (endpoint.includes('/complete')) {
       const id = endpoint.match(/\/requests\/(\d+)\/complete/)[1];
       const req = requests.find(r => r.id == id);
       if (req) {
         req.status = 'Completed';
-        saveRequests(requests);
+        safeSaveRequests(requests);
         const food = foods.find(f => f.id == req.foodId);
-        if (food) { food.status = 'Completed'; saveFoods(foods); }
+        if (food) { food.status = 'Completed'; safeSaveFoods(foods); }
       }
     }
 
@@ -369,9 +448,9 @@ const LocalEngine = {
   delete(endpoint) {
     if (endpoint.startsWith('/foods/')) {
       const id = endpoint.replace('/foods/', '');
-      let foods = getFoods();
+      let foods = safeGetFoods();
       foods = foods.filter(f => f.id != id);
-      saveFoods(foods);
+      safeSaveFoods(foods);
       return { success: true, message: 'Listing deleted.' };
     }
     return { success: true };

@@ -39,30 +39,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
       <div>
         <h2 class="fw-bold text-dark mb-1">Impact Dashboard</h2>
-        <p class="text-muted mb-0">Track real-time community & personal surplus food sharing stats.</p>
+        <p class="text-muted mb-0">Track your community contribution to preventing food waste.</p>
       </div>
-      
-      <div class="d-flex align-items-center gap-2">
-        <!-- View Toggle Nav -->
-        <div class="auth-tab-nav mb-0 py-1 px-1">
-          <button type="button" class="auth-tab-btn active py-1 px-3" id="btnViewCommunity" onclick="toggleDashboardView('community')">
-            <i class="bi bi-globe me-1"></i> Community Platform
-          </button>
-          <button type="button" class="auth-tab-btn py-1 px-3" id="btnViewPersonal" onclick="toggleDashboardView('personal')">
-            <i class="bi bi-person-badge me-1"></i> My Personal Stats
-          </button>
-        </div>
-        <a href="share-food.html" class="btn btn-green">+ Share Food</a>
-      </div>
-    </div>
-
-    <!-- Info Banner for New Users -->
-    <div id="dashboardWelcomeNotice" class="alert alert-success border-0 shadow-sm py-2.5 px-3 rounded-3 mb-4 d-flex align-items-center justify-content-between">
-      <div class="small">
-        <i class="bi bi-stars text-warning me-1 fs-5"></i>
-        <span id="welcomeNoticeText">Showing <strong>Overall Community Platform Impact</strong>. Share your first surplus food item to grow your personal impact score!</span>
-      </div>
-      <a href="share-food.html" class="btn btn-sm btn-success rounded-2 ms-2 text-nowrap">Share Food Now</a>
+      <a href="share-food.html" class="btn btn-green">+ Share Surplus Food</a>
     </div>
 
     <!-- 6 Metric Cards -->
@@ -144,10 +123,7 @@
     <div class="row g-4">
       <div class="col-lg-6">
         <div class="form-card">
-          <h5 class="fw-bold text-dark mb-3 d-flex align-items-center justify-content-between">
-            <span><i class="bi bi-clock-history me-1 text-success"></i> <span id="foodListHeaderTitle">Recent Community Food Listed</span></span>
-            <a href="find-food.html" class="btn btn-sm btn-outline-green py-0 px-2 small">Explore All</a>
-          </h5>
+          <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history me-1"></i> Recent Food Listed</h5>
           <div id="recentFoodsList">
             <!-- Dynamically populated by js/dashboard.js -->
           </div>
@@ -156,10 +132,7 @@
 
       <div class="col-lg-6">
         <div class="form-card">
-          <h5 class="fw-bold text-dark mb-3 d-flex align-items-center justify-content-between">
-            <span><i class="bi bi-arrow-down-up me-1 text-success"></i> <span id="requestListHeaderTitle">Recent Community Activity</span></span>
-            <a href="requests.html" class="btn btn-sm btn-outline-green py-0 px-2 small">Manage Requests</a>
-          </h5>
+          <h5 class="fw-bold text-dark mb-3"><i class="bi bi-arrow-down-up me-1"></i> Recent Requests Activity</h5>
           <div id="recentRequestsList">
             <!-- Dynamically populated by js/dashboard.js -->
           </div>
@@ -176,6 +149,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/storage.js"></script>
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/foods.js"></script>
@@ -184,3 +158,4 @@
   <script src="js/script.js"></script>
 </body>
 </html>
+
