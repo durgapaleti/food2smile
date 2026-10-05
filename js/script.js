@@ -602,7 +602,7 @@ async function initMyFoodsPage() {
 
                 <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
                   <span class="badge ${expiry.cssClass}">${expiry.badgeText}</span>
-                  <button onclick="handleDeleteMyFood(${f.id})" class="btn btn-sm btn-outline-danger">
+                  <button onclick="handleDeleteMyFood('${f.id || f._id}')" class="btn btn-sm btn-outline-danger">
                     <i class="bi bi-trash me-1"></i> Remove
                   </button>
                 </div>

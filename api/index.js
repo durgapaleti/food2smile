@@ -280,10 +280,8 @@ app.get('/api/foods/:id', (req, res) => {
 });
 
 app.delete('/api/foods/:id', (req, res) => {
-  const idx = db.foods.findIndex(f => f.id == req.params.id);
-  if (idx !== -1) {
-    db.foods.splice(idx, 1);
-  }
+  const targetId = String(req.params.id);
+  db.foods = db.foods.filter(f => String(f.id) !== targetId && String(f._id) !== targetId);
   res.json({ success: true, message: 'Listing removed successfully.' });
 });
 
@@ -291,8 +289,8 @@ app.delete('/api/foods/:id', (req, res) => {
 app.all(['/api/foods.php', '/foods.php'], (req, res) => {
   if (req.method === 'POST') return handleCreateFood(req, res);
   if (req.query.action === 'delete' && req.query.id) {
-    const idx = db.foods.findIndex(f => f.id == req.query.id);
-    if (idx !== -1) db.foods.splice(idx, 1);
+    const targetId = String(req.query.id);
+    db.foods = db.foods.filter(f => String(f.id) !== targetId && String(f._id) !== targetId);
     return res.json({ success: true, message: 'Listing deleted.' });
   }
   return handleGetFoods(req, res);

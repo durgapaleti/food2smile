@@ -17,6 +17,37 @@ function setFirebaseDbUrl(url) {
   else localStorage.removeItem(FIREBASE_URL_KEY);
 }
 
+function getDeletedFoodIds() {
+  try {
+    const raw = localStorage.getItem('food2smile_deleted_ids');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function addDeletedFoodId(id) {
+  if (!id) return;
+  try {
+    const ids = getDeletedFoodIds();
+    const strId = String(id);
+    if (!ids.includes(strId)) {
+      ids.push(strId);
+      localStorage.setItem('food2smile_deleted_ids', JSON.stringify(ids));
+    }
+  } catch (e) {}
+}
+
+function filterOutDeletedFoods(foods) {
+  if (!Array.isArray(foods)) return [];
+  const deletedIds = getDeletedFoodIds();
+  if (deletedIds.length === 0) return foods;
+  return foods.filter(f => {
+    const idStr = String(f.id || f._id || '');
+    return !deletedIds.includes(idStr);
+  });
+}
+
 const FirebaseEngine = {
   async get(endpoint) {
     const baseUrl = getFirebaseDbUrl();
@@ -28,6 +59,7 @@ const FirebaseEngine = {
         if (res.ok) {
           const raw = await res.json();
           let foods = raw ? Object.values(raw) : [];
+          foods = filterOutDeletedFoods(foods);
 
           if (endpoint.includes('?')) {
             const params = new URLSearchParams(endpoint.split('?')[1]);
@@ -211,6 +243,32 @@ const FirebaseEngine = {
       }
     } catch (err) {}
     return null;
+  },
+
+  async delete(endpoint) {
+    const baseUrl = getFirebaseDbUrl();
+    if (!baseUrl) return null;
+
+    try {
+      if (endpoint.startsWith('/foods/')) {
+        const id = endpoint.replace('/foods/', '');
+        addDeletedFoodId(id);
+        await fetch(`${baseUrl}/foods/${id}.json`, {
+          method: 'DELETE'
+        });
+        LocalEngine.delete(endpoint);
+        return { success: true, message: 'Listing deleted from Firebase.' };
+      }
+      if (endpoint.startsWith('/requests/')) {
+        const id = endpoint.replace('/requests/', '');
+        await fetch(`${baseUrl}/requests/${id}.json`, {
+          method: 'DELETE'
+        });
+        LocalEngine.delete(endpoint);
+        return { success: true, message: 'Request deleted from Firebase.' };
+      }
+    } catch (err) {}
+    return null;
   }
 };
 
@@ -220,7 +278,12 @@ const API = {
     
     // 0. Try Firebase Realtime Database first if configured
     const fbRes = await FirebaseEngine.get(cleanEndpoint);
-    if (fbRes) return fbRes;
+    if (fbRes) {
+      if (cleanEndpoint.startsWith('/foods') && fbRes.foods) {
+        fbRes.foods = filterOutDeletedFoods(fbRes.foods);
+      }
+      return fbRes;
+    }
 
     const primaryUrl = `${API_BASE_URL}${cleanEndpoint}`;
     
@@ -237,9 +300,10 @@ const API = {
             const localRes = LocalEngine.get(cleanEndpoint);
             const localFoods = (localRes && localRes.foods) || [];
             const combinedMap = new Map();
-            (localFoods || []).forEach(f => combinedMap.set(String(f.id), f));
-            (data.foods || []).forEach(f => combinedMap.set(String(f.id), f));
-            return { success: true, foods: Array.from(combinedMap.values()) };
+            (localFoods || []).forEach(f => combinedMap.set(String(f.id || f._id), f));
+            (data.foods || []).forEach(f => combinedMap.set(String(f.id || f._id), f));
+            const mergedFoods = filterOutDeletedFoods(Array.from(combinedMap.values()));
+            return { success: true, foods: mergedFoods };
           }
           return data;
         }
@@ -384,6 +448,15 @@ const API = {
 
   async delete(endpoint) {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+    if (cleanEndpoint.startsWith('/foods/')) {
+      const id = cleanEndpoint.replace('/foods/', '');
+      addDeletedFoodId(id);
+    }
+
+    const fbRes = await FirebaseEngine.delete(cleanEndpoint);
+    LocalEngine.delete(cleanEndpoint);
+
     const primaryUrl = `${API_BASE_URL}${cleanEndpoint}`;
 
     try {
@@ -393,7 +466,7 @@ const API = {
       });
       if (response.ok) {
         const result = await response.json();
-        if (result && typeof result === 'object') return result;
+        if (result && typeof result === 'object') return fbRes || result;
       }
     } catch (err) {}
 
@@ -410,11 +483,11 @@ const API = {
       });
       if (response.ok) {
         const result = await response.json();
-        if (result && typeof result === 'object') return result;
+        if (result && typeof result === 'object') return fbRes || result;
       }
     } catch (err) {}
 
-    return LocalEngine.delete(endpoint);
+    return fbRes || LocalEngine.delete(endpoint);
   }
 };
 
@@ -536,6 +609,7 @@ const LocalEngine = {
 
     if (endpoint.startsWith('/foods')) {
       let foods = safeGetFoods();
+      foods = filterOutDeletedFoods(foods);
 
       // Query params parsing
       if (endpoint.includes('?')) {
@@ -761,8 +835,9 @@ const LocalEngine = {
   delete(endpoint) {
     if (endpoint.startsWith('/foods/')) {
       const id = endpoint.replace('/foods/', '');
+      addDeletedFoodId(id);
       let foods = safeGetFoods();
-      foods = foods.filter(f => f.id != id);
+      foods = foods.filter(f => String(f.id) !== String(id) && String(f._id) !== String(id));
       safeSaveFoods(foods);
       return { success: true, message: 'Listing deleted.' };
     }
