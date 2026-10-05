@@ -401,7 +401,7 @@ async function initRequestsPage() {
   async function loadRequests() {
     try {
       // 1. Incoming requests for foods listed by current user
-      const incomingRes = await API.get(`/requests?action=received&userId=${user.id}`);
+      const incomingRes = await API.get(`/requests?action=received&userId=${user.id}&userName=${encodeURIComponent(user.name || '')}`);
       const incomingRequests = incomingRes.requests || [];
 
       if (incomingContainer) {
@@ -457,7 +457,7 @@ async function initRequestsPage() {
       }
 
       // 2. Outgoing requests sent by current user
-      const outgoingRes = await API.get(`/requests?action=my&userId=${user.id}`);
+      const outgoingRes = await API.get(`/requests?action=my&userId=${user.id}&userName=${encodeURIComponent(user.name || '')}`);
       const outgoingRequests = outgoingRes.requests || [];
 
       if (outgoingContainer) {

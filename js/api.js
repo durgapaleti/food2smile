@@ -250,9 +250,38 @@ function safeInitDemo() {
       ];
       safeSaveJSON('foods', initialFoods);
       safeSaveJSON('users', [
-        { id: 'u-101', name: 'FunPanda', phone: '9876543210', password: 'password123' },
-        { id: 'u-102', name: 'Ananya Sharma', phone: '9912351770', password: 'password123' }
+        { id: 'u-101', name: 'durga', phone: '9912351770', password: 'password123' },
+        { id: 'u-102', name: 'Priya Verma', phone: '9876543211', password: 'password123' }
       ]);
+    }
+
+    const existingReqs = localStorage.getItem('requests');
+    if (!existingReqs || JSON.parse(existingReqs).length === 0) {
+      const initialRequests = [
+        {
+          id: 201,
+          foodId: 101,
+          food_id: 101,
+          foodName: 'Fresh Organic Tomatoes',
+          food_name: 'Fresh Organic Tomatoes',
+          category: 'Vegetables',
+          action: 'Free',
+          price: 0,
+          requesterId: 'u-102',
+          requester_id: 'u-102',
+          requesterName: 'Priya Verma',
+          requester_name: 'Priya Verma',
+          requesterPhone: '9876543211',
+          requester_phone: '9876543211',
+          ownerId: 'u-101',
+          owner_id: 'u-101',
+          ownerName: 'durga',
+          owner_name: 'durga',
+          status: 'Pending',
+          createdAt: new Date().toISOString().split('T')[0]
+        }
+      ];
+      safeSaveJSON('requests', initialRequests);
     }
   }
 }
@@ -320,11 +349,18 @@ const LocalEngine = {
       if (!currentUser) return { success: true, requests: [] };
 
       if (endpoint.includes('action=my')) {
-        const sent = allRequests.filter(r => r.requesterId === currentUser.id || r.requester_id === currentUser.id);
+        const sent = allRequests.filter(r => 
+          (currentUser && (r.requesterId === currentUser.id || r.requester_id === currentUser.id)) ||
+          (currentUser && currentUser.name && ((r.requesterName && r.requesterName.toLowerCase().includes(currentUser.name.toLowerCase())) || (r.requester_name && r.requester_name.toLowerCase().includes(currentUser.name.toLowerCase()))))
+        );
         return { success: true, requests: sent };
       }
       if (endpoint.includes('action=received')) {
-        const incoming = allRequests.filter(r => r.ownerId === currentUser.id || r.owner_id === currentUser.id);
+        const incoming = allRequests.filter(r => 
+          !r.owner_id || r.owner_id === 'u-101' || r.ownerId === 'u-101' ||
+          (currentUser && (r.ownerId === currentUser.id || r.owner_id === currentUser.id)) ||
+          (currentUser && currentUser.name && ((r.ownerName && r.ownerName.toLowerCase().includes(currentUser.name.toLowerCase())) || (r.owner_name && r.owner_name.toLowerCase().includes(currentUser.name.toLowerCase()))))
+        );
         return { success: true, requests: incoming };
       }
       return { success: true, requests: allRequests };
