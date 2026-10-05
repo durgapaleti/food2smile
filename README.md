@@ -5,7 +5,7 @@
 
 ---
 
-## 📌 Syllabus Modules Covered
+## 📌 Modules Covered
 
 * **Module 1**: HTML5 Document Structure (`.html` files), Semantic Tags, Form Controls, and Inputs.
 * **Module 2**: CSS3 Handcrafted Design System, Flexbox/Grid, Micro-animations, JavaScript Functions, Events, and **AJAX / Fetch REST Integration**.
