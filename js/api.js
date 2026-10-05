@@ -6,13 +6,225 @@
  */
 
 const API_BASE_URL = 'api';
+const FIREBASE_URL_KEY = 'food2smile_firebase_url';
+
+function getFirebaseDbUrl() {
+  return window.FOOD2SMILE_FIREBASE_URL || localStorage.getItem(FIREBASE_URL_KEY) || '';
+}
+
+function setFirebaseDbUrl(url) {
+  if (url) localStorage.setItem(FIREBASE_URL_KEY, url.trim().replace(/\/$/, ''));
+  else localStorage.removeItem(FIREBASE_URL_KEY);
+}
+
+const FirebaseEngine = {
+  async get(endpoint) {
+    const baseUrl = getFirebaseDbUrl();
+    if (!baseUrl) return null;
+
+    try {
+      if (endpoint.startsWith('/foods')) {
+        const res = await fetch(`${baseUrl}/foods.json`);
+        if (res.ok) {
+          const raw = await res.json();
+          let foods = raw ? Object.values(raw) : [];
+
+          if (endpoint.includes('?')) {
+            const params = new URLSearchParams(endpoint.split('?')[1]);
+            const sort = params.get('sort');
+            const category = params.get('category');
+            const action = params.get('action');
+            const search = params.get('search');
+            const userId = params.get('userId');
+            const userName = params.get('userName');
+
+            if (action === 'my' && (userId || userName)) {
+              const uId = userId ? String(userId).trim() : '';
+              const uName = userName ? String(userName).trim().toLowerCase() : '';
+              foods = foods.filter(f => (uId && (f.owner_id === uId || f.ownerId === uId)) || (uName && ((f.owner_name && f.owner_name.toLowerCase().includes(uName)) || (f.ownerName && f.ownerName.toLowerCase().includes(uName)))));
+              return { success: true, foods };
+            }
+
+            foods = foods.filter(f => f.status === 'Available');
+
+            if (category && category !== 'All') foods = foods.filter(f => f.category === category);
+            if (action && action !== 'All') foods = foods.filter(f => f.action === action);
+            if (search) {
+              const q = search.toLowerCase();
+              foods = foods.filter(f => (f.name && f.name.toLowerCase().includes(q)) || (f.category && f.category.toLowerCase().includes(q)) || (f.location && f.location.toLowerCase().includes(q)));
+            }
+
+            if (sort === 'price-low') foods.sort((a, b) => (a.finalPrice || a.final_price || 0) - (b.finalPrice || b.final_price || 0));
+            else if (sort === 'price-high') foods.sort((a, b) => (b.finalPrice || b.final_price || 0) - (a.finalPrice || a.final_price || 0));
+            else if (sort === 'spoiling-soon') foods.sort((a, b) => new Date(a.spoilingDate || a.spoiling_date || 0) - new Date(b.spoilingDate || b.spoiling_date || 0));
+            else foods.sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0));
+          }
+
+          return { success: true, foods };
+        }
+      }
+
+      if (endpoint.startsWith('/requests')) {
+        const res = await fetch(`${baseUrl}/requests.json`);
+        if (res.ok) {
+          const raw = await res.json();
+          let requests = raw ? Object.values(raw) : [];
+
+          if (endpoint.includes('?')) {
+            const params = new URLSearchParams(endpoint.split('?')[1]);
+            const action = params.get('action');
+            const userId = params.get('userId');
+            const userName = params.get('userName');
+
+            const uId = userId ? String(userId).trim() : '';
+            const uName = userName ? String(userName).trim().toLowerCase() : '';
+
+            if (action === 'my' && (uId || uName)) {
+              requests = requests.filter(r => (uId && (r.requesterId === uId || r.requester_id === uId)) || (uName && ((r.requesterName && r.requesterName.toLowerCase().includes(uName)) || (r.requester_name && r.requester_name.toLowerCase().includes(uName)))));
+            } else if (action === 'received') {
+              requests = requests.filter(r => (uId && (r.ownerId === uId || r.owner_id === uId)) || (uName && ((r.ownerName && r.ownerName.toLowerCase().includes(uName)) || (r.owner_name && r.owner_name.toLowerCase().includes(uName)))) || !r.owner_id || r.owner_id === 'u-101');
+            }
+          }
+
+          return { success: true, requests };
+        }
+      }
+
+      if (endpoint.startsWith('/dashboard')) {
+        const foodsRes = await fetch(`${baseUrl}/foods.json`);
+        const reqsRes = await fetch(`${baseUrl}/requests.json`);
+        const foodsRaw = foodsRes.ok ? await foodsRes.json() : null;
+        const reqsRaw = reqsRes.ok ? await reqsRes.json() : null;
+
+        const foods = foodsRaw ? Object.values(foodsRaw) : [];
+        const requests = reqsRaw ? Object.values(reqsRaw) : [];
+
+        const stats = {
+          totalListed: foods.length,
+          listedCount: foods.length,
+          availableCount: foods.filter(f => f.status === 'Available').length,
+          soldCount: foods.filter(f => f.status === 'Sold').length,
+          givenCount: foods.filter(f => f.status === 'Given' || (f.action === 'Free' && f.status === 'Completed')).length,
+          donatedCount: foods.filter(f => f.status === 'Donated' || (f.action === 'Donate' && f.status === 'Completed')).length,
+          savedCount: foods.filter(f => f.status === 'Completed' || f.status === 'Sold' || f.status === 'Given' || f.status === 'Donated').length,
+          recentFoods: foods.slice(0, 5),
+          recentRequests: requests.slice(0, 5)
+        };
+
+        return { success: true, stats, communityStats: stats, recentFoods: foods.slice(0, 5), recentRequests: requests.slice(0, 5) };
+      }
+    } catch (err) {}
+    return null;
+  },
+
+  async post(endpoint, data) {
+    const baseUrl = getFirebaseDbUrl();
+    if (!baseUrl) return null;
+
+    try {
+      if (endpoint === '/foods') {
+        const user = safeGetCurrentUser();
+        const id = data.id || Date.now();
+        const newFood = {
+          id,
+          owner_id: data.ownerId || (user ? user.id : 'u-101'),
+          ownerId: data.ownerId || (user ? user.id : 'u-101'),
+          owner_name: data.ownerName || (user ? user.name : 'durga'),
+          ownerName: data.ownerName || (user ? user.name : 'durga'),
+          name: data.name,
+          category: data.category,
+          quantity: data.quantity,
+          location: data.location || 'Local Pickup',
+          originalPrice: data.originalPrice || 0,
+          original_price: data.originalPrice || 0,
+          action: data.action,
+          discount: data.discount || 0,
+          finalPrice: data.finalPrice || 0,
+          final_price: data.finalPrice || 0,
+          deliveryOption: data.deliveryOption || 'Self Pickup',
+          delivery_option: data.deliveryOption || 'Self Pickup',
+          spoilingDate: data.spoilingDate,
+          spoiling_date: data.spoilingDate,
+          image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=500&q=80',
+          status: 'Available',
+          createdAt: new Date().toISOString(),
+          created_at: new Date().toISOString()
+        };
+
+        await fetch(`${baseUrl}/foods/${id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newFood)
+        });
+
+        LocalEngine.post('/foods', newFood);
+        return { success: true, message: 'Surplus food listed successfully!', food: newFood };
+      }
+
+      if (endpoint === '/requests') {
+        const user = safeGetCurrentUser();
+        const id = Date.now();
+        const newReq = {
+          id,
+          foodId: data.foodId,
+          food_id: data.foodId,
+          requesterId: data.requesterId || (user ? user.id : 'u-102'),
+          requester_id: data.requesterId || (user ? user.id : 'u-102'),
+          requesterName: data.requesterName || (user ? user.name : 'Neighbor'),
+          requester_name: data.requesterName || (user ? user.name : 'Neighbor'),
+          requesterPhone: data.requesterPhone || '9876543210',
+          requester_phone: data.requesterPhone || '9876543210',
+          ownerId: data.ownerId || 'u-101',
+          owner_id: data.ownerId || 'u-101',
+          ownerName: data.ownerName || 'durga',
+          owner_name: data.ownerName || 'durga',
+          status: 'Pending',
+          createdAt: new Date().toISOString().split('T')[0],
+          created_at: new Date().toISOString().split('T')[0]
+        };
+
+        await fetch(`${baseUrl}/requests/${id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newReq)
+        });
+
+        LocalEngine.post('/requests', newReq);
+        return { success: true, message: 'Food request sent to owner!', request: newReq };
+      }
+
+      if (endpoint === '/requests/action') {
+        const { id, action } = data;
+        let newStatus = 'Pending';
+        if (action === 'accept') newStatus = 'Accepted';
+        if (action === 'reject') newStatus = 'Rejected';
+        if (action === 'complete') newStatus = 'Completed';
+
+        await fetch(`${baseUrl}/requests/${id}.json`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+
+        LocalEngine.put(`/requests/${id}/${action}`, data);
+        return { success: true, message: `Request status updated to ${newStatus}.` };
+      }
+    } catch (err) {}
+    return null;
+  }
+};
 
 const API = {
   async get(endpoint) {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    
+    // 0. Try Firebase Realtime Database first if configured
+    const fbRes = await FirebaseEngine.get(cleanEndpoint);
+    if (fbRes) return fbRes;
+
     const primaryUrl = `${API_BASE_URL}${cleanEndpoint}`;
     
-    // 1. Try Vercel / Node REST endpoint first
+    // 1. Try Vercel / Node REST endpoint
     try {
       const response = await fetch(primaryUrl, {
         method: 'GET',
@@ -61,6 +273,11 @@ const API = {
 
   async post(endpoint, data = {}) {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+    // 0. Try Firebase Realtime Database first if configured
+    const fbRes = await FirebaseEngine.post(cleanEndpoint, data);
+    if (fbRes) return fbRes;
+
     const primaryUrl = `${API_BASE_URL}${cleanEndpoint}`;
 
     // 1. Try Vercel / Node REST endpoint first
@@ -110,6 +327,10 @@ const API = {
 
   async put(endpoint, data = {}) {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+    const fbRes = await FirebaseEngine.post(cleanEndpoint, data);
+    if (fbRes) return fbRes;
+
     const primaryUrl = `${API_BASE_URL}${cleanEndpoint}`;
 
     try {
@@ -149,7 +370,8 @@ const API = {
     } catch (err) {}
 
     return LocalEngine.put(endpoint, data);
-  },
+  }
+};,
 
   async delete(endpoint) {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
